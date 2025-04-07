@@ -28,9 +28,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                User? user = await _authService.signUp(_emailController.text, _passwordController.text);
-                if (user != null) {
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+                try {
+                  if (_passwordController.text.length < 6) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Password must be at least 6 characters'),
+                      ),
+                    );
+                    return;
+                  }
+                  User? user = await _authService.signUp(
+                    _emailController.text,
+                    _passwordController.text,
+                  );
+                  if (user != null) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Registration failed: ${e.toString()}'),
+                    ),
+                  );
                 }
               },
               child: const Text('Register'),

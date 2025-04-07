@@ -28,9 +28,30 @@ class _SignInScreenState extends State<SignInScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                User? user = await _authService.signIn(_emailController.text, _passwordController.text);
-                if (user != null) {
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+                try {
+                  User? user = await _authService.signIn(
+                    _emailController.text,
+                    _passwordController.text,
+                  );
+                  if (user != null) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                    );
+                  }
+                } on FirebaseAuthException catch (e) {
+                  String message = 'Login failed';
+                  if (e.code == 'user-not-found' ||
+                      e.code == 'wrong-password') {
+                    message = 'Username or Password is Invalid';
+                  }
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(message)));
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Login failed: ${e.toString()}')),
+                  );
                 }
               },
               child: const Text('Login'),
